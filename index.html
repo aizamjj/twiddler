@@ -1,27 +1,118 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
+    <title>Twiddler - AJ</title>
     <script src="jquery.js"></script>
     <script src="data_generator.js"></script>
+    <link href="style.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Cinzel&display=swap" rel="stylesheet">
   </head>
   <body>
+
+    <!-- Header -->
+
+    <header class="header">
+      <h1>
+        <a href="index.html">Twiddler</a>
+      </h1>  
+    </header> 
+
+    <!-- Buttons -->
+
+    <section class="container">
+      <button id="tweetButton" type="button" class="btn btn-alt">New Tweet</button>
+      <button id="homeButton" type="button" class="btn btn-alt">Back to Home</button>
+    </section>
+
+    <!-- Tweets -->
+
+    <div class="allTweets"></div>
+    <div class="userTweets"></div>
+
+    <!-- JavaScript -->
+
     <script>
 
-      $(document).ready(function(){
-        var $body = $('body');
-        $body.html('');
+      $(document).ready(function() {
 
-        var index = streams.home.length - 1;
-        while(index >= 0){
-          var tweet = streams.home[index];
-          var $tweet = $('<div></div>');
-          $tweet.text('@' + tweet.user + ': ' + tweet.message);
-          $tweet.appendTo($body);
-          index -= 1;
+        var $body = $("body");
+        // $body.html('');
+        var $newsfeed = $(".allTweets");
+        var $userHistory = $(".userTweets")
+        var $tweetButton = $("#tweetButton");
+        var $homeButton = $("#homeButton");
+        $homeButton.hide();
+
+
+        // Create new tweets:
+        var createNewTweet = function() {
+          var index = streams.home.length - 1;
+          $newsfeed.html('');
+          while (index >= 0){
+            var tweet = streams.home[index];
+            var $tweet = $('<div class="tweet"></div>');
+            var $user = $('<button class="userBtn userBtn-alt"></button>');
+            var $message = $('<div class="tweet"></div>');
+            var $time = $('<div id="dateTime"></div>');
+            
+            $user.text("@" + tweet.user);
+            $message.text(tweet.message);
+            $time.text(tweet.created_at);
+            
+            $user.appendTo($tweet);
+            $user.click(showUserTimeline);
+            $message.appendTo($tweet);
+            $time.appendTo($tweet);
+            $tweet.appendTo($newsfeed); 
+            index -= 1;
+          }
         }
 
-      });
+        // Button to Generate New Tweet
+        var $tweetButton = $("#tweetButton");
+        $tweetButton.click(function() {
+          generateRandomTweet();
+          var tweet = streams.home.pop();
+          createNewTweet(tweet);
+        });
 
+        // Click on username to access that user's timeline
+        var showUserTimeline = function () {
+          $userHistory.html('');
+          $homeButton.show();
+          $tweetButton.hide();
+          $newsfeed.hide();
+          $userHistory.show();
+          var username = $(this).text().slice(1);
+          var arrMessages = streams.users[username];
+
+          for (var i = arrMessages.length - 1; i >= 0; i--) {
+            var message = arrMessages[i].message;
+            var user = arrMessages[i].user;
+            var time = arrMessages[i].created_at;
+            var $tweet = $("<div></div>");
+            var $message = $('<div class="tweet"></div>');
+            var $user = $('<button class="userBtn userBtn-alt"></div>');
+            var $time = $('<div id="dateTime"></div>');
+
+            $user.text('@'+user).appendTo($tweet);
+            $message.text(message).appendTo($tweet);
+            $time.text(time).appendTo($tweet);
+            $tweet.appendTo($userHistory);
+          }
+        };
+
+        var $homeButton = $("#homeButton");
+        $homeButton.click(function() {
+          $homeButton.hide();
+          $tweetButton.show();
+          $newsfeed.show();
+          $userHistory.hide();
+        });
+
+        createNewTweet();
+    });
     </script>
   </body>
 </html>
